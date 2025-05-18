@@ -16,12 +16,17 @@ import Grid from "@mui/material/Grid2"
 import TextField from "@mui/material/TextField"
 import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import styles from "./Login.module.css"
+import { useState } from "react"
 
 export const Login = () => {
   const themeMode = useAppSelector(selectThemeMode)
 
   const [login] = useLoginMutation()
   const {data: captchaData, refetch} = useGetCaptchaQuery(undefined, {skip:true})
+
+  //счетчик попыток ввода для капчи
+  const [loginAttempts, setLoginAttempts] = useState(0)
+const [showCaptcha, setShowCaptcha] = useState(false)
 
   const dispatch = useAppDispatch()
 
@@ -44,10 +49,18 @@ export const Login = () => {
         dispatch(setIsLoggedInAC({ isLoggedIn: true }))
         localStorage.setItem(AUTH_TOKEN, res.data.data.token)
         reset()
-      }
+        setLoginAttempts(0)
+        setShowCaptcha(false)
+      } else {
+        setLoginAttempts((prev) => prev + 1)
+        if (loginAttempts + 1 >= 3) {
+          setShowCaptcha(true)
+          refetch()
+        }
       if(res.data?.resultCode === ResultCode.CaptchaError) {
          refetch()
       }
+    }
     }) 
     .catch((err) => {
       console.error("Ошибка логина:", err)
@@ -88,10 +101,9 @@ export const Login = () => {
               error={!!errors.email}
               {...register("password")}
             />
-            {errors.password && <span className={styles.errorMessage}>{errors.password.message}</span>}
-           {captchaData?.url && (
+           {(showCaptcha || captchaData?.url) && (
             <>
-             <img src={captchaData.url} alt="captcha" style={{ margin: "16px 0" }} />
+             <img src={captchaData?.url} alt="captcha" style={{ margin: "16px 0" }} />
                <TextField
         label="Captcha"
         margin="normal"

@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react-swc"
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/lastTodoList/',
+  base: '/todolist-20/',
   plugins: [react()],
   resolve: {
     alias: {
