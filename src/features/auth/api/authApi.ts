@@ -4,14 +4,14 @@ import type { LoginArgs } from "./authApi.types"
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    me: build.query<BaseResponse<{ id: number; email: string; login: string }>, void>({
+    me: build.query<BaseResponse<{ id: number; email: string; login: string, captcha?: string }>, void>({
       query: () => "auth/me",
     }),
     login: build.mutation<BaseResponse<{ userId: number; token: string }>, LoginArgs>({
-      query: (body) => ({
+      query: (credentials) => ({
         url: "auth/login",
         method: "POST",
-        body,
+        body: credentials
       }),
     }),
     logout: build.mutation<BaseResponse, void>({
@@ -20,7 +20,12 @@ export const authApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    getCaptcha: build.query<{url: string}, void>({
+      query: () => ({
+         url: 'security/get-captcha-url',
+      })
+    })
   }),
 })
 
-export const { useMeQuery, useLoginMutation, useLogoutMutation } = authApi
+export const { useMeQuery, useLoginMutation, useLogoutMutation, useGetCaptchaQuery } = authApi

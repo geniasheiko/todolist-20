@@ -1,5 +1,4 @@
 import { baseApi } from "@/app/baseApi"
-import { instance } from "@/common/instance"
 import type { BaseResponse } from "@/common/types"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import type { Todolist } from "./todolistsApi.types"
@@ -25,10 +24,6 @@ export const todolistsApi = baseApi.injectEndpoints({
         url: `todo-lists/${id}`,
         method: "DELETE",
       }),
-      // const index = state.findIndex(todolist => todolist.id === id)
-      //       if (index !== -1) {
-      //         state.splice(index, 1)
-      //       }
          async onQueryStarted(id: string, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           todolistsApi.util.updateQueryData('getTodolists', undefined, state => {
@@ -64,18 +59,3 @@ export const {
   useUpdateTodolistTitleMutation,
 } = todolistsApi
 
-export const _todolistsApi = {
-  getTodolists() {
-    return instance.get<Todolist[]>("/todo-lists")
-  },
-  changeTodolistTitle(payload: { id: string; title: string }) {
-    const { id, title } = payload
-    return instance.put<BaseResponse>(`/todo-lists/${id}`, { title })
-  },
-  createTodolist(title: string) {
-    return instance.post<BaseResponse<{ item: Todolist }>>("/todo-lists", { title })
-  },
-  deleteTodolist(id: string) {
-    return instance.delete<BaseResponse>(`/todo-lists/${id}`)
-  },
-}

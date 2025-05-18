@@ -3,7 +3,7 @@ import { AUTH_TOKEN } from "@/common/constants"
 import { ResultCode } from "@/common/enums"
 import { useAppDispatch, useAppSelector } from "@/common/hooks"
 import { getTheme } from "@/common/theme"
-import { useLoginMutation } from "@/features/auth/api/authApi"
+import { useGetCaptchaQuery, useLoginMutation } from "@/features/auth/api/authApi"
 import { type Inputs, loginSchema } from "@/features/auth/lib/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Button from "@mui/material/Button"
@@ -20,7 +20,8 @@ import styles from "./Login.module.css"
 export const Login = () => {
   const themeMode = useAppSelector(selectThemeMode)
 
-  const [login] = useLoginMutation()
+  const [login, {error}] = useLoginMutation()
+  const {data: captchaData, refetch} = useGetCaptchaQuery(undefined, {skip:true})
 
   const dispatch = useAppDispatch()
 
@@ -44,6 +45,12 @@ export const Login = () => {
         localStorage.setItem(AUTH_TOKEN, res.data.data.token)
         reset()
       }
+      if(res.data?.resultCode === ResultCode.CaptchaError) {
+         refetch()
+      }
+    }) 
+    .catch((err) => {
+      console.error("Ошибка логина:", err)
     })
   }
 
@@ -82,6 +89,19 @@ export const Login = () => {
               {...register("password")}
             />
             {errors.password && <span className={styles.errorMessage}>{errors.password.message}</span>}
+           {captchaData?.url && (
+            <>
+             <img src={captchaData.url} alt="captcha" style={{ margin: "16px 0" }} />
+               <TextField
+        label="Captcha"
+        margin="normal"
+        error={!!errors.captcha}
+        {...register("captcha")}
+        placeholder="Введите символы с картинки"
+      />
+      {errors.captcha && <span className={styles.errorMessage}>{errors.captcha.message}</span>}
+    </>
+           )}
             <FormControlLabel
               label={"Remember me"}
               control={
