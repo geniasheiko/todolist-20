@@ -20,7 +20,7 @@ import styles from "./Login.module.css"
 export const Login = () => {
   const themeMode = useAppSelector(selectThemeMode)
 
-  const [login, {error}] = useLoginMutation()
+  const [login] = useLoginMutation()
   const {data: captchaData, refetch} = useGetCaptchaQuery(undefined, {skip:true})
 
   const dispatch = useAppDispatch()
